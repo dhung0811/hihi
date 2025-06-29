@@ -57,6 +57,26 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        journal: {
+          50: "#faf8ff",
+          100: "#f4f0ff",
+          200: "#ebe4ff",
+          300: "#ddd0ff",
+          400: "#c9b3ff",
+          500: "#b794f6",
+          600: "#9f7aea",
+          700: "#805ad5",
+          800: "#6b46c1",
+          900: "#553c9a",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
