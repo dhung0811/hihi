@@ -7,11 +7,18 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
+  ChevronRight,
+  User,
+  MessageSquare,
+  MoreVertical,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -19,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TaskCard } from "@/components/TaskCard";
 import { TaskDialog } from "@/components/TaskDialog";
 import { Task, TaskStatus } from "@/types/task";
 
@@ -38,7 +44,7 @@ const MOCK_TASKS: Task[] = [
     id: "1",
     title: "Implement user authentication system",
     description:
-      "Build a secure login and registration system with JWT tokens and password encryption. Include email verification and password reset functionality.",
+      "Build a secure login and registration system with JWT tokens.",
     assignment: "Sarah Johnson",
     assignedTime: new Date(2024, 0, 15, 9, 0),
     completedTime: new Date(2024, 0, 16, 17, 30),
@@ -48,43 +54,25 @@ const MOCK_TASKS: Task[] = [
       {
         id: "c1",
         author: "Sarah Johnson",
-        content:
-          "Great work on the implementation! The security measures are well thought out.",
+        content: "Great work on the implementation!",
         timestamp: new Date(2024, 0, 16, 18, 0),
-      },
-      {
-        id: "c2",
-        author: "Mike Chen",
-        content:
-          "Consider adding two-factor authentication for enhanced security.",
-        timestamp: new Date(2024, 0, 17, 10, 15),
       },
     ],
   },
   {
     id: "2",
     title: "Design homepage wireframes",
-    description:
-      "Create wireframes for the new homepage layout focusing on user experience and conversion optimization.",
+    description: "Create wireframes for the new homepage layout.",
     assignment: "Alex Rodriguez",
     assignedTime: new Date(2024, 0, 16, 14, 0),
     status: "In Progress",
     category: "Design",
-    comments: [
-      {
-        id: "c3",
-        author: "Alex Rodriguez",
-        content:
-          "Looking forward to seeing the mobile-first approach in action.",
-        timestamp: new Date(2024, 0, 16, 15, 30),
-      },
-    ],
+    comments: [],
   },
   {
     id: "3",
-    title: "Weekly team standup meeting",
-    description:
-      "Discuss project progress, blockers, and plan for the upcoming week.",
+    title: "Weekly team standup",
+    description: "Discuss project progress and blockers.",
     assignment: "Emily Davis",
     assignedTime: new Date(2024, 0, 17, 10, 0),
     status: "Pending",
@@ -94,30 +82,11 @@ const MOCK_TASKS: Task[] = [
   {
     id: "4",
     title: "Write API documentation",
-    description:
-      "Document all REST API endpoints with examples and response formats for the authentication service.",
+    description: "Document all REST API endpoints with examples.",
     assignment: "David Kim",
     assignedTime: new Date(2024, 0, 15, 11, 0),
     status: "In Progress",
     category: "Documentation",
-    comments: [
-      {
-        id: "c4",
-        author: "David Kim",
-        content: "Please include error handling examples in the documentation.",
-        timestamp: new Date(2024, 0, 15, 12, 0),
-      },
-    ],
-  },
-  {
-    id: "5",
-    title: "Test payment integration",
-    description:
-      "Comprehensive testing of the payment gateway integration including success and failure scenarios.",
-    assignment: "Lisa Wang",
-    assignedTime: new Date(2024, 0, 16, 13, 0),
-    status: "Pending",
-    category: "Testing",
     comments: [],
   },
 ];
@@ -126,11 +95,10 @@ export default function Index() {
   const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  // Filter tasks based on search and filters
+  // Filter tasks
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       const matchesSearch =
@@ -138,28 +106,9 @@ export default function Index() {
         task.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory =
         selectedCategory === "all" || task.category === selectedCategory;
-      const matchesStatus =
-        selectedStatus === "all" || task.status === selectedStatus;
-
-      return matchesSearch && matchesCategory && matchesStatus;
+      return matchesSearch && matchesCategory;
     });
-  }, [tasks, searchQuery, selectedCategory, selectedStatus]);
-
-  // Group tasks by category
-  const tasksByCategory = useMemo(() => {
-    const grouped = filteredTasks.reduce(
-      (acc, task) => {
-        if (!acc[task.category]) {
-          acc[task.category] = [];
-        }
-        acc[task.category].push(task);
-        return acc;
-      },
-      {} as Record<string, Task[]>,
-    );
-
-    return grouped;
-  }, [filteredTasks]);
+  }, [tasks, searchQuery, selectedCategory]);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -167,9 +116,37 @@ export default function Index() {
     const completed = tasks.filter((t) => t.status === "Done").length;
     const inProgress = tasks.filter((t) => t.status === "In Progress").length;
     const pending = tasks.filter((t) => t.status === "Pending").length;
-
     return { total, completed, inProgress, pending };
   }, [tasks]);
+
+  const getStatusColor = (status: TaskStatus) => {
+    switch (status) {
+      case "Done":
+        return "bg-success text-success-foreground";
+      case "In Progress":
+        return "bg-warning text-warning-foreground";
+      case "Pending":
+        return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "short",
+    });
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   const handleCreateTask = (taskData: Omit<Task, "id" | "comments">) => {
     const newTask: Task = {
@@ -182,7 +159,6 @@ export default function Index() {
 
   const handleEditTask = (taskData: Omit<Task, "id" | "comments">) => {
     if (!editingTask) return;
-
     setTasks((prev) =>
       prev.map((task) =>
         task.id === editingTask.id ? { ...task, ...taskData } : task,
@@ -220,197 +196,194 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-journal-100 via-journal-50 to-background">
-      {/* Header */}
-      <div className="border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="w-[390px] h-[844px] mx-auto bg-gradient-to-b from-journal-100 via-journal-50 to-background overflow-hidden flex flex-col">
+      {/* Mobile Header */}
+      <div className="bg-gradient-to-r from-primary/10 via-journal-100/80 to-primary/5 backdrop-blur-sm border-b px-4 py-4 flex-shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                {getInitials("Good Morning")}
+              </AvatarFallback>
+            </Avatar>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-journal-600 bg-clip-text text-transparent">
-                Daily Work Journal
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Track your daily tasks and collaborate with your team
-              </p>
+              <p className="text-sm text-muted-foreground">Good morning</p>
+              <p className="font-semibold text-foreground">Duy Hùng</p>
             </div>
-            <Button
-              onClick={() => setIsDialogOpen(true)}
-              className="bg-primary hover:bg-primary/90 shadow-lg"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Task
-            </Button>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-primary hover:bg-primary/90 h-8 px-3"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-journal-600 bg-clip-text text-transparent mb-1">
+          Daily Work Journal
+        </h1>
+        <p className="text-xs text-muted-foreground">
+          {new Date().toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
+      </div>
+
+      {/* Stats Row */}
+      <div className="px-4 py-3 flex-shrink-0">
+        <div className="grid grid-cols-4 gap-2">
+          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 text-center">
+            <div className="flex justify-center mb-1">
+              <Calendar className="h-4 w-4 text-primary" />
+            </div>
+            <p className="text-lg font-bold text-foreground">{stats.total}</p>
+            <p className="text-xs text-muted-foreground">Total</p>
+          </div>
+          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 text-center">
+            <div className="flex justify-center mb-1">
+              <CheckCircle className="h-4 w-4 text-success" />
+            </div>
+            <p className="text-lg font-bold text-success">{stats.completed}</p>
+            <p className="text-xs text-muted-foreground">Done</p>
+          </div>
+          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 text-center">
+            <div className="flex justify-center mb-1">
+              <Clock className="h-4 w-4 text-warning" />
+            </div>
+            <p className="text-lg font-bold text-warning">{stats.inProgress}</p>
+            <p className="text-xs text-muted-foreground">Progress</p>
+          </div>
+          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 text-center">
+            <div className="flex justify-center mb-1">
+              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-lg font-bold text-foreground">{stats.pending}</p>
+            <p className="text-xs text-muted-foreground">Pending</p>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-gradient-to-r from-card to-card/50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Tasks
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {stats.total}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-card to-card/50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-success/10 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Completed
-                  </p>
-                  <p className="text-2xl font-bold text-success">
-                    {stats.completed}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-card to-card/50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-warning/10 rounded-lg">
-                  <Clock className="h-5 w-5 text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    In Progress
-                  </p>
-                  <p className="text-2xl font-bold text-warning">
-                    {stats.inProgress}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-card to-card/50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted/50 rounded-lg">
-                  <AlertCircle className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Pending
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {stats.pending}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Search and Filter */}
+      <div className="px-4 py-2 flex-shrink-0">
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search tasks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-9 text-sm"
+            />
+          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-20 h-9">
+              <Filter className="h-4 w-4" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              {CATEGORIES.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+      </div>
 
-        {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search tasks..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Select
-                  value={selectedCategory}
-                  onValueChange={setSelectedCategory}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <Filter className="mr-2 h-4 w-4" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {CATEGORIES.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={selectedStatus}
-                  onValueChange={setSelectedStatus}
-                >
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Done">Done</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tasks by Category */}
-        <div className="space-y-6">
-          {Object.entries(tasksByCategory).map(([category, categoryTasks]) => (
-            <Card key={category} className="overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-journal-50 to-journal-100/50">
-                <CardTitle className="flex items-center justify-between">
-                  <span className="text-lg font-semibold text-foreground">
-                    {category}
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/10 text-primary"
+      {/* Tasks List - Scrollable */}
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
+        <div className="space-y-3">
+          {filteredTasks.map((task) => (
+            <Card
+              key={task.id}
+              className="bg-card/90 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-colors"
+            >
+              <CardContent className="p-3">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-sm text-foreground truncate mb-1">
+                      {task.title}
+                    </h3>
+                    <Badge
+                      className={`${getStatusColor(task.status)} text-xs px-2 py-0.5`}
+                    >
+                      {task.status}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => openEditDialog(task)}
                   >
-                    {categoryTasks.length} tasks
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {categoryTasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onEdit={openEditDialog}
-                      onDelete={handleDeleteTask}
-                      onStatusChange={handleStatusChange}
-                    />
-                  ))}
+                    <MoreVertical className="h-3 w-3" />
+                  </Button>
+                </div>
+
+                <p className="text-xs text-muted-foreground leading-relaxed mb-3 line-clamp-2">
+                  {task.description}
+                </p>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <User className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                    <span className="text-muted-foreground">By:</span>
+                    <span className="font-medium text-foreground">
+                      {task.assignment}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                    <span className="text-muted-foreground">Assigned:</span>
+                    <span className="font-medium text-foreground">
+                      {formatTime(task.assignedTime)}
+                    </span>
+                  </div>
+                  {task.completedTime && (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-3 w-3 text-success flex-shrink-0" />
+                      <span className="text-muted-foreground">Completed:</span>
+                      <span className="font-medium text-success">
+                        {formatTime(task.completedTime)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/50">
+                  <div className="flex gap-1">
+                    {task.status !== "Done" && (
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          handleStatusChange(
+                            task.id,
+                            task.status === "Pending" ? "In Progress" : "Done",
+                          )
+                        }
+                        className="h-6 px-2 text-xs bg-primary hover:bg-primary/90"
+                      >
+                        {task.status === "Pending" ? "Start" : "Complete"}
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <MessageSquare className="h-3 w-3" />
+                    <span>{task.comments.length}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
 
-          {Object.keys(tasksByCategory).length === 0 && (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">
+          {filteredTasks.length === 0 && (
+            <Card className="bg-card/90 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <p className="text-sm text-muted-foreground">
                   No tasks found matching your criteria.
                 </p>
               </CardContent>

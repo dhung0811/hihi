@@ -83,57 +83,67 @@ export function TaskDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[350px] max-h-[700px] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{task ? "Edit Task" : "Create New Task"}</DialogTitle>
+          <DialogTitle className="text-lg">
+            {task ? "Edit Task" : "Create New Task"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Task Title</Label>
+            <Label htmlFor="title" className="text-sm">
+              Task Title
+            </Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
               placeholder="Enter task title..."
+              className="h-9 text-sm"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-sm">
+              Description
+            </Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
               placeholder="Describe the task details..."
-              className="min-h-[80px]"
+              className="min-h-[60px] text-sm resize-none"
               required
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="assignment">Assigned By</Label>
-              <Input
-                id="assignment"
-                value={formData.assignment}
-                onChange={(e) =>
-                  handleInputChange("assignment", e.target.value)
-                }
-                placeholder="Manager name..."
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="assignment" className="text-sm">
+              Assigned By
+            </Label>
+            <Input
+              id="assignment"
+              value={formData.assignment}
+              onChange={(e) => handleInputChange("assignment", e.target.value)}
+              placeholder="Manager name..."
+              className="h-9 text-sm"
+              required
+            />
+          </div>
 
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category" className="text-sm">
+                Category
+              </Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => handleInputChange("category", value)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="Select..." />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
@@ -144,33 +154,40 @@ export function TaskDialog({
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status" className="text-sm">
+                Status
+              </Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  handleInputChange("status", value as TaskStatus)
+                }
+              >
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="Done">Done</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value) =>
-                handleInputChange("status", value as TaskStatus)
-              }
+          <div className="flex gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 h-9 text-sm"
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Done">Done</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              {task ? "Update Task" : "Create Task"}
+            <Button type="submit" className="flex-1 h-9 text-sm">
+              {task ? "Update" : "Create"}
             </Button>
           </div>
         </form>
