@@ -42,10 +42,9 @@ const CATEGORIES = [
 const MOCK_TASKS: Task[] = [
   {
     id: "1",
-    title: "Implement user authentication system",
-    description:
-      "Build a secure login and registration system with JWT tokens.",
-    assignment: "Sarah Johnson",
+    title: "example....",
+    description: "description....",
+    assignment: "Ngoc Tram",
     assignedTime: new Date(2024, 0, 15, 9, 0),
     completedTime: new Date(2024, 0, 16, 17, 30),
     status: "Done",
@@ -53,7 +52,7 @@ const MOCK_TASKS: Task[] = [
     comments: [
       {
         id: "c1",
-        author: "Sarah Johnson",
+        author: "Ngoc Tram",
         content: "Great work on the implementation!",
         timestamp: new Date(2024, 0, 16, 18, 0),
       },
@@ -61,9 +60,9 @@ const MOCK_TASKS: Task[] = [
   },
   {
     id: "2",
-    title: "Design homepage wireframes",
-    description: "Create wireframes for the new homepage layout.",
-    assignment: "Alex Rodriguez",
+    title: "example....",
+    description: "description....",
+    assignment: "Ngoc Tram",
     assignedTime: new Date(2024, 0, 16, 14, 0),
     status: "In Progress",
     category: "Design",
@@ -71,7 +70,7 @@ const MOCK_TASKS: Task[] = [
   },
   {
     id: "3",
-    title: "Weekly team standup",
+    title: "example....",
     description: "Discuss project progress and blockers.",
     assignment: "Emily Davis",
     assignedTime: new Date(2024, 0, 17, 10, 0),
@@ -208,7 +207,7 @@ export default function Index() {
             </Avatar>
             <div>
               <p className="text-sm text-muted-foreground">Good morning</p>
-              <p className="font-semibold text-foreground">Duy Hùng</p>
+              <p className="font-semibold text-foreground">user,...</p>
             </div>
           </div>
           <Button
