@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Clock } from "lucide-react";
+import { Send, Clock, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
